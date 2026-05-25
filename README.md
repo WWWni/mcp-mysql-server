@@ -1,8 +1,9 @@
-# @f4ww4z/mcp-mysql-server
-[![Trust Score](https://archestra.ai/mcp-catalog/api/badge/quality/f4ww4z/mcp-mysql-server)](https://archestra.ai/mcp-catalog/f4ww4z__mcp-mysql-server)
-[![smithery badge](https://smithery.ai/badge/@f4ww4z/mcp-mysql-server)](https://smithery.ai/server/@f4ww4z/mcp-mysql-server)
+# @wwwwni/mcp-mysql-server
+
 
 A Model Context Protocol server that provides MySQL database operations. This server enables AI models to interact with MySQL databases through a standardized interface.
+
+This repository is forked from https://github.com/f4ww4z/mcp-mysql-server.
 
 <a href="https://glama.ai/mcp/servers/qma33al6ie"><img width="380" height="200" src="https://glama.ai/mcp/servers/qma33al6ie/badge" alt="mcp-mysql-server MCP server" /></a>
 
@@ -10,15 +11,15 @@ A Model Context Protocol server that provides MySQL database operations. This se
 
 ### Installing via Smithery
 
-To install MySQL Server for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@f4ww4z/mcp-mysql-server):
+To install MySQL Server for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@wwwwni/mcp-mysql-server):
 
 ```bash
-npx -y @smithery/cli install @f4ww4z/mcp-mysql-server --client claude
+npx -y @smithery/cli install @wwwwni/mcp-mysql-server --client claude
 ```
 
 ### Manual Installation
 ```bash
-npx @f4ww4z/mcp-mysql-server
+npx @wwwwni/mcp-mysql-server
 ```
 
 ## Configuration
@@ -32,7 +33,7 @@ The server requires the following environment variables to be set in your MCP se
   "mcpServers": {
     "mysql": {
       "command": "npx",
-      "args": ["-y", "@f4ww4z/mcp-mysql-server", "mysql://user:password@localhost:port/database"],
+      "args": ["-y", "@wwwwni/mcp-mysql-server", "mysql://user:password@localhost:port/database"],
     }
   }
 }
@@ -43,7 +44,7 @@ The server requires the following environment variables to be set in your MCP se
   "mcpServers": {
     "mysql": {
       "command": "npx",
-      "args": ["-y", "@f4ww4z/mcp-mysql-server"],
+      "args": ["-y", "@wwwwni/mcp-mysql-server"],
       "env": {
         "MYSQL_HOST": "your_host",
         "MYSQL_USER": "your_user",
@@ -65,7 +66,7 @@ The server requires the following environment variables to be set in your MCP se
 command = "npx"
 args = [
   "-y",
-  "@f4ww4z/mcp-mysql-server",
+  "@wwwwni/mcp-mysql-server",
   "mysql://user:password@127.0.0.1:3306/database"
 ]
 ```
@@ -79,7 +80,7 @@ args = [
 command = "npx"
 args = [
   "-y",
-  "@f4ww4z/mcp-mysql-server",
+  "@wwwwni/mcp-mysql-server",
   "mysql://user:password@127.0.0.1:3306/database"
 ]
 ```
@@ -111,7 +112,9 @@ use_mcp_tool({
 ```
 
 ### 2. query
-Execute SELECT queries with optional prepared statement parameters.
+Execute read-only queries (SELECT, SHOW, DESCRIBE, EXPLAIN) with optional prepared statement parameters.
+
+In this fork, the `query` tool supports `SHOW/DESCRIBE/EXPLAIN` in addition to `SELECT` (and rejects non-read-only statements).
 
 ```typescript
 use_mcp_tool({
@@ -125,7 +128,7 @@ use_mcp_tool({
 ```
 
 ### 3. execute
-Execute INSERT, UPDATE, or DELETE queries with optional prepared statement parameters.
+Execute non-read-only queries (INSERT, UPDATE, DELETE, DDL, etc.) with optional prepared statement parameters.
 
 ```typescript
 use_mcp_tool({
@@ -187,7 +190,7 @@ The server provides detailed error messages for common issues:
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request to https://github.com/f4ww4z/mcp-mysql-server
+Contributions are welcome! Please feel free to submit a Pull Request to https://github.com/WWWni/mcp-mysql-server
 
 ## License
 

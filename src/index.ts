@@ -65,6 +65,47 @@ function parseMySQLUrl(url: string): DatabaseConfig {
   }
 }
 
+function stripLeadingSqlComments(sql: string): string {
+  let remaining = sql;
+  while (true) {
+    remaining = remaining.trimStart();
+
+    if (remaining.startsWith('/*')) {
+      const endIndex = remaining.indexOf('*/', 2);
+      if (endIndex === -1) return '';
+      remaining = remaining.slice(endIndex + 2);
+      continue;
+    }
+
+    if (remaining.startsWith('--') || remaining.startsWith('#')) {
+      const newlineIndex = remaining.indexOf('\n');
+      if (newlineIndex === -1) return '';
+      remaining = remaining.slice(newlineIndex + 1);
+      continue;
+    }
+
+    return remaining;
+  }
+}
+
+function getSqlLeadingKeyword(sql: string): string {
+  const normalized = stripLeadingSqlComments(sql);
+  if (!normalized) return '';
+  const match = normalized.match(/^[A-Za-z_]+/);
+  return match ? match[0].toUpperCase() : '';
+}
+
+function isReadOnlySql(sql: string): boolean {
+  const keyword = getSqlLeadingKeyword(sql);
+  return (
+    keyword === 'SELECT' ||
+    keyword === 'SHOW' ||
+    keyword === 'DESCRIBE' ||
+    keyword === 'DESC' ||
+    keyword === 'EXPLAIN'
+  );
+}
+
 class MySQLServer {
   private server: Server;
   private connection: mysql.Connection | null = null;
@@ -185,13 +226,13 @@ class MySQLServer {
         },
         {
           name: 'query',
-          description: 'Execute a SELECT query',
+          description: 'Execute a read-only query (SELECT, SHOW, DESCRIBE, EXPLAIN)',
           inputSchema: {
             type: 'object',
             properties: {
               sql: {
                 type: 'string',
-                description: 'SQL SELECT query',
+                description: 'Read-only SQL query (SELECT, SHOW, DESCRIBE, EXPLAIN)',
               },
               params: {
                 type: 'array',
@@ -206,13 +247,13 @@ class MySQLServer {
         },
         {
           name: 'execute',
-          description: 'Execute an INSERT, UPDATE, or DELETE query',
+          description: 'Execute a non-SELECT query (INSERT, UPDATE, DELETE, DDL, etc.)',
           inputSchema: {
             type: 'object',
             properties: {
               sql: {
                 type: 'string',
-                description: 'SQL query (INSERT, UPDATE, DELETE)',
+                description: 'Non-SELECT SQL query (INSERT, UPDATE, DELETE, DDL, etc.)',
               },
               params: {
                 type: 'array',
@@ -346,10 +387,10 @@ class MySQLServer {
       throw new McpError(ErrorCode.InvalidParams, 'SQL query is required');
     }
 
-    if (!args.sql.trim().toUpperCase().startsWith('SELECT')) {
+    if (!isReadOnlySql(args.sql)) {
       throw new McpError(
         ErrorCode.InvalidParams,
-        'Only SELECT queries are allowed with query tool'
+        'Only read-only queries are allowed with query tool (SELECT, SHOW, DESCRIBE, EXPLAIN)'
       );
     }
 
@@ -378,11 +419,10 @@ class MySQLServer {
       throw new McpError(ErrorCode.InvalidParams, 'SQL query is required');
     }
 
-    const sql = args.sql.trim().toUpperCase();
-    if (sql.startsWith('SELECT')) {
+    if (isReadOnlySql(args.sql)) {
       throw new McpError(
         ErrorCode.InvalidParams,
-        'Use query tool for SELECT statements'
+        'Use query tool for read-only statements (SELECT, SHOW, DESCRIBE, EXPLAIN)'
       );
     }
 
